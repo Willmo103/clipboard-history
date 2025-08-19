@@ -1,19 +1,33 @@
-# Clipboard History Manager
+# Enhanced Clipboard History Manager
 
-A comprehensive clipboard history application similar to Windows 11's clipboard history, featuring infinite storage using SQLite database, system tray integration, and cross-platform support.
+A comprehensive clipboard history application with advanced features including file handling, image support, JSON export, and automatic backup functionality. Similar to Windows 11's clipboard history but with enhanced capabilities for power users.
 
-## Features
+## 🚀 Key Features
+
+### Core Functionality
 
 - **Infinite History**: Store unlimited clipboard entries in SQLite database
-- **System Tray Integration**: Runs silently in background with tray icon
+- **Multi-Content Support**: Text, files (as URIs), and images (as Base64)
+- **System Tray Integration**: Runs silently with intelligent tray behavior
 - **Global Hotkey**: Quick access with Ctrl+Shift+V
-- **Search & Filter**: Find clipboard entries quickly
-- **Favorites System**: Mark important entries as favorites
-- **Cross-Platform**: Works on Windows, macOS, and Linux
-- **Auto-Start Scripts**: Easy startup configuration for all platforms
-- **Duplicate Prevention**: Automatically handles duplicate entries
-- **Rich Preview**: Full preview of clipboard content
-- **Access Statistics**: Track usage frequency
+- **Smart Auto-Hide**: Window closes when losing focus (when opened from tray)
+
+### Advanced Features
+
+- **File Handling**: Capture file paths with metadata (size, type, thumbnails)
+- **Image Support**: Store and preview images with thumbnails
+- **JSON Export**: Export history with optional favorites-only filter
+- **Automatic Backup**: Auto-sync new items to JSON export on startup
+- **Rich Preview**: Tabbed interface showing text, images, and file details
+- **Type Filtering**: Filter by content type (Text/Files/Images/All)
+
+### User Experience
+
+- **Search & Filter**: Real-time search with multiple filter options
+- **Favorites System**: Star important entries for quick access
+- **URL Detection**: Automatic hyperlink detection and click-to-open
+- **File Integration**: Click to open files in default applications
+- **Access Statistics**: Track usage frequency and timestamps
 
 ## Installation
 
@@ -98,53 +112,127 @@ The application includes startup scripts for all major platforms:
 
 ## Usage
 
-### Basic Operations
+### Enhanced Tray Behavior
 
-- **Start Application**: Run any of the startup scripts or execute directly
-- **Open History Window**:
-  - Use global hotkey `Ctrl+Shift+V`
-  - Double-click system tray icon
-  - Right-click tray icon → "Show Clipboard History"
+- **Single Click Tray**: Opens/closes the main window
+- **Auto-Hide**: Window automatically hides when losing focus (if opened from tray)
+- **Stay Open Mode**: Double-click items or use hotkey to keep window open
+- **Recent Items Menu**: Right-click tray for quick access to last 5 items
+
+### Content Types
+
+#### 📝 Text Content
+
+- Plain text with automatic URL detection
+- Clickable links in preview
+- Search through text content
+
+#### 📁 File Content
+
+- Stores file paths as URIs
+- Shows file metadata (size, type, location)
+- Thumbnail generation for image files
+- Click to open files in default applications
+- File existence validation
+
+#### 🖼️ Image Content
+
+- Images stored as Base64 strings
+- Thumbnail previews in list and detail view
+- Click to view full-size images
+- Supports all common image formats
 
 ### Interface Features
 
 #### Main Window
 
-- **Search Bar**: Type to filter clipboard entries
-- **Favorites Filter**: Toggle to show only starred items
-- **History List**: All clipboard entries with timestamps
-- **Preview Panel**: Full content preview of selected item
+- **Tabbed Preview**: Separate tabs for text and image content
+- **Type Filter Dropdown**: Filter by All/Text/Files/Images
+- **Enhanced Search**: Search across content and file paths
+- **Favorites Toggle**: Quick access to starred items
+- **Rich Details Panel**: Metadata, timestamps, and access statistics
 
-#### Actions
+#### Actions Available
 
-- **Copy to Clipboard**: Double-click item or use "Copy" button
-- **Add/Remove Favorite**: Star/unstar important entries
-- **Delete Item**: Remove unwanted entries
-- **Clear History**: Remove all entries (keeps favorites)
+- **Copy to Clipboard**: Preserves original format (text/file/image)
+- **Open/View**:
+  - Files: Opens in default application
+  - URLs: Opens in default browser
+  - Images: Temporary view in system image viewer
+- **Toggle Favorite**: Star/unstar for quick access
+- **Delete**: Remove unwanted entries
+- **Export JSON**: Export with optional favorites-only filter
 
-#### System Tray
+#### System Tray Features
 
-- **Recent Items Menu**: Quick access to last 5 clipboard entries
-- **Click to Copy**: Select any recent item to copy it
-- **Show/Hide Window**: Double-click tray icon
+- **Type-Aware Menu**: Icons show content type (📁📝🖼️🔗)
+- **Quick Copy**: Click any recent item to copy
+- **Export Shortcut**: Quick export from tray menu
+- **Smart Notifications**: Shows content type when copying
 
 ### Keyboard Shortcuts
 
-- `Ctrl+Shift+V`: Open clipboard history window (global hotkey)
+- `Ctrl+Shift+V`: Toggle clipboard history window (global hotkey)
 - `Double-click`: Copy item to clipboard
+- `Enter`: Copy selected item
 - `Delete`: Remove selected item
-- `Ctrl+F`: Focus search bar (when window is active)
+- `Ctrl+F`: Focus search bar
+- `Esc`: Hide window (when opened from tray)
 
-## Database
+## Export & Backup
 
-The application uses SQLite database (`clipboard_history.db`) to store:
+### JSON Export Format
 
-- Clipboard content
-- Timestamps
-- Content type
-- Favorite status
-- Access count statistics
-- Content hash (for duplicate detection)
+```json
+{
+  "export_info": {
+    "timestamp": "2024-01-01T12:00:00",
+    "total_items": 150,
+    "favorites_only": false,
+    "version": "1.0"
+  },
+  "items": [
+    {
+      "id": 1,
+      "content": "Sample text or Base64 image data",
+      "content_type": "text|file|image",
+      "file_path": "/path/to/file.txt",
+      "file_size": 1024,
+      "mime_type": "text/plain",
+      "thumbnail": "base64_thumbnail_data",
+      "timestamp": "2024-01-01T12:00:00",
+      "is_favorite": true,
+      "access_count": 5
+    }
+  ]
+}
+```
+
+### Automatic Backup System
+
+- **Startup Sync**: Automatically backs up new items on app start
+- **Incremental Updates**: Only syncs items not previously backed up
+- **Export Ready**: JSON export file always up-to-date
+- **Background Operation**: No user intervention required
+
+### Manual Export Options
+
+- **Full Export**: All clipboard history items
+- **Favorites Only**: Export only starred items
+- **Custom Location**: Choose export file location
+- **Progress Tracking**: Visual progress during large exports
+
+## Enhanced Database Schema
+
+The SQLite database now includes:
+
+- `content`: Main clipboard content (text/Base64 image/file path)
+- `content_type`: Type indicator (text/file/image)
+- `file_path`: Original file location (for file type)
+- `file_size`: File size in bytes
+- `mime_type`: MIME type for proper handling
+- `thumbnail`: Thumbnail image data (for files/images)
+- `backed_up`: Flag indicating if item is in JSON backup
 
 ### Database Location
 
@@ -290,6 +378,10 @@ For issues and questions:
 4. Run in debug mode for detailed error messages
 
 ## Version History
+
+- **v1.1**: Added features
+- Improved performance and stability
+- Added support for image and file content
 
 - **v1.0**: Initial release with core functionality
   - Infinite clipboard history
