@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 import hashlib
 from urllib.parse import urlparse
-from io import BytesIO
+
 
 from PyQt6.QtWidgets import (
     QApplication,
@@ -48,6 +48,10 @@ from PyQt6.QtCore import (
     QSettings,
     QUrl,
     QMimeData,
+    QIODevice,
+    QTimer,
+    QByteArray,
+    QBuffer,
 )
 from PyQt6.QtGui import (
     QIcon,
@@ -57,6 +61,8 @@ from PyQt6.QtGui import (
     QShortcut,
     QDesktopServices,
     QClipboard,
+    QImage,
+    QGuiApplication,
 )
 
 
@@ -407,8 +413,8 @@ class ClipboardMonitor(QThread):
 
     def run(self):
         """Main monitoring loop."""
-        app = QApplication.instance()
-        clipboard = app.clipboard()
+        app: QApplication = QApplication.instance()
+        clipboard: QClipboard = app.clipboard()
 
         while self.running:
             try:
@@ -432,7 +438,7 @@ class ClipboardMonitor(QThread):
                 print(f"Clipboard monitor error: {e}")
                 self.msleep(1000)
 
-    def process_clipboard_data(self, mime_data):
+    def process_clipboard_data(self, mime_data: QMimeData):
         """Process clipboard data and determine type."""
         content = ""
         content_type = "text"
@@ -465,14 +471,15 @@ class ClipboardMonitor(QThread):
 
             # Check for images
             if mime_data.hasImage():
-                image = mime_data.imageData()
-                if image and not image.isNull():
-                    pixmap = QPixmap.fromImage(image)
+                _image: QImage = mime_data.imageData()
+                if _image and not _image.isNull():
+                    pixmap = QPixmap.fromImage(_image)
 
                     # Convert image to base64
-                    buffer = BytesIO()
+                    buffer = QBuffer()
+                    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
                     pixmap.save(buffer, "PNG")
-                    image_data = buffer.getvalue()
+                    image_data = buffer.data()
                     content = base64.b64encode(image_data).decode()
                     content_type = "image"
 
@@ -516,9 +523,10 @@ class ClipboardMonitor(QThread):
                         Qt.TransformationMode.SmoothTransformation,
                     )
 
-                    buffer = BytesIO()
+                    buffer = QBuffer()
+                    buffer.open(QIODevice.OpenModeFlag.WriteOnly)
                     thumbnail.save(buffer, "PNG")
-                    return buffer.getvalue()
+                    return buffer.data()
         except Exception as e:
             print(f"Error creating thumbnail: {e}")
 
@@ -709,6 +717,7 @@ class EnhancedPreviewWidget(QWidget):
         """Update the information panel."""
         info_texts = [
             f"Content Type: {content_type.title()}",
+            f"File Path: {file_path if file_path else 'N/A'}",
             f"Timestamp: {datetime.fromisoformat(timestamp).strftime('%Y-%m-%d %H:%M:%S')}",
             f"Favorite: {'Yes' if is_favorite else 'No'}",
             f"Access Count: {access_count}",
