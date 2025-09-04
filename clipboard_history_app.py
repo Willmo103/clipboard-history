@@ -134,6 +134,7 @@ class ClipboardHistoryApp:
 
         self.update_tray_menu()
 
+
     def quick_export(self):
         """Quick export from tray menu."""
         try:
